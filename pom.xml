@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.6</version>
+		<version>3.5.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>cl.usach.glpi.agent</groupId>
-	<artifactId>usach-glpi-librenms-agent</artifactId>
+	<groupId>cl.usach.wazuh.agent</groupId>
+	<artifactId>wazuh-export-agent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>usach-glpi-librenms-agent</name>
-	<description>Java GLPI custom agent for LibreNMS API </description>
+	<name>wazuh-export-agent</name>
+	<description>Java export data agent for Wazuh API</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -37,7 +37,17 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

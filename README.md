@@ -1,1 +1,1 @@
-# LibreNMSAgent
+# Wazuh Export Agent

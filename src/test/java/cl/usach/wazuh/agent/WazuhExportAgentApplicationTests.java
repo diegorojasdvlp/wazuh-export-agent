@@ -1,10 +1,10 @@
-package cl.usach.glpi.agent.librenms;
+package cl.usach.wazuh.agent;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class LNMSAgentApplicationTests {
+class WazuhExportAgentApplicationTests {
 
 	@Test
 	void contextLoads() {

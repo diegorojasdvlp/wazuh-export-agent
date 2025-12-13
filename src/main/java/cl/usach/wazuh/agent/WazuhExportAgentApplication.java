@@ -1,13 +1,13 @@
-package cl.usach.glpi.agent.librenms;
+package cl.usach.wazuh.agent;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LNMSAgentApplication {
+public class WazuhExportAgentApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LNMSAgentApplication.class, args);
+		SpringApplication.run(WazuhExportAgentApplication.class, args);
 	}
 
 }
