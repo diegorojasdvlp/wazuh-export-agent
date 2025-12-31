@@ -1,5 +1,5 @@
-# Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-21-jammy AS build
+# Stage 1: Build con JDK 17
+FROM maven:3.9.6-eclipse-temurin-17-jammy AS build
 WORKDIR /app
 
 # Copiar pom y recuperar dependencias
@@ -11,8 +11,8 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Hardened Runtime
-FROM eclipse-temurin:21-jre-jammy
+# Stage 2: Runtime con JRE 17 (más ligero y seguro que el JDK completo)
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # Correr como usuario no raiz (llamado spring)
