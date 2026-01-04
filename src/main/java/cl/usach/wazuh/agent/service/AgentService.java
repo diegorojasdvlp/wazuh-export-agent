@@ -17,7 +17,7 @@ import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @Service
 public class AgentService {
-    @Qualifier("wazuhIndexerWebClient")
+    @Qualifier("wazuhServerClient")
     private final WebClient webClient;
 
     private final @Nonnull AgentRepository repository;
