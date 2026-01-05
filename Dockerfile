@@ -1,5 +1,5 @@
 # Stage 1: Build con JDK 17
-FROM maven:3.9.6-eclipse-temurin-17-jammy AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copiar pom y recuperar dependencias
@@ -25,7 +25,7 @@ USER spring:spring
 COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
 
 # Cambiar a variable ENV para el puerto si es necesario
-EXPOSE 8080
+EXPOSE 8081
 
 # Flags para la maquina virtual (lenguaje, contenedor, uso de ram, nombres)
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
