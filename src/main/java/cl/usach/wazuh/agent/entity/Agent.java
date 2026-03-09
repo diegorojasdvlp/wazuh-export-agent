@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.util.Date;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -17,5 +19,6 @@ public class Agent {
     private Long id;
     private String name;
     private String ip;
-    private Boolean status;
+    private boolean active;
+    private Date date;
 }

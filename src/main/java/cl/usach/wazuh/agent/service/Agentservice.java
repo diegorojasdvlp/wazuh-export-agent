@@ -5,19 +5,12 @@ import cl.usach.wazuh.agent.config.WazuhProperties;
 import cl.usach.wazuh.agent.entity.Agent;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @Service
 public class Agentservice {
@@ -68,10 +61,9 @@ public class Agentservice {
 
                                 Agent agent = new Agent();
 
-                                agent.setId(node.path("id").asText(""));
                                 agent.setName(node.path("name").asText(""));
                                 agent.setIp(node.path("ip").asText(""));
-                                agent.setStatus(node.path("status").asText("not_connected"));
+                                agent.setActive(node.path("status").asText("not_connected").equals("active"));
                                 return agent;
                             });
 
