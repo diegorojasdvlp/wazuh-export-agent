@@ -1,33 +1,21 @@
 package cl.usach.wazuh.agent.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.annotation.Nonnull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "vulnerabilities")
-public class Vulnerability {
-
+@Getter
+@Setter
+@Table(name = "agents")
+public class Agent {
     @Id
     private String id;
-
-    @Nonnull
-    private String agentName;
-
-    @Nonnull
-    private String vulnerabilityId;
-
-
-    @Nonnull
-    private String severity;
-
+    private String name;
+    private String ip;
+    private String status;
 }
-
