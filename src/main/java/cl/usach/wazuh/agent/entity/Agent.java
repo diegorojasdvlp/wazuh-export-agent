@@ -21,4 +21,11 @@ public class Agent {
     private String ip;
     private boolean active;
     private Date date;
+
+    public Agent(String name, String ip, boolean active, Date date) {
+        this.name = name;
+        this.ip = ip;
+        this.active = active;
+        this.date = date;
+    }
 }
