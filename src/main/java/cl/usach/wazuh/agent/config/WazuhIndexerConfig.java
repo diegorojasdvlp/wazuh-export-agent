@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import javax.net.ssl.SSLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +15,14 @@ import java.util.Map;
 public class WazuhIndexerConfig {
     private final Map<String, WebClient> clients = new HashMap<>();
 
-    public WazuhIndexerConfig(Map<String, WazuhProperties> instances) throws SSLException {
-
+    public WazuhIndexerConfig(Map<String, WazuhProperties> instances, SshTunnelManager tunnelManager) throws Exception {
         for (Map.Entry<String, WazuhProperties> entry : instances.entrySet()) {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
-            String baseUrl = props.getIndexerUrl();
+
+            int localPort = tunnelManager.openTunnel(instanceName + "-indexer", props, extractPort(props.getIndexerUrl()));
+            String tunnelUrl = "https://localhost:" + localPort;
+
             SslContext sslContext = SslContextBuilder
                     .forClient()
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
@@ -29,7 +30,7 @@ public class WazuhIndexerConfig {
             HttpClient httpClient = HttpClient.create()
                     .secure(t -> t.sslContext(sslContext));
             WebClient client = WebClient.builder()
-                    .baseUrl(baseUrl)
+                    .baseUrl(tunnelUrl)
                     .defaultHeaders(h -> h.setBasicAuth(
                             props.getIndexerUser(),
                             props.getIndexerPassword()
@@ -39,7 +40,14 @@ public class WazuhIndexerConfig {
             clients.put(instanceName, client);
         }
     }
-
+    private int extractPort(String url) {
+        try {
+            String[] parts = url.split(":");
+            return Integer.parseInt(parts[parts.length - 1].replaceAll("/.*", ""));
+        } catch (Exception e) {
+            return 9200; // Wazuh indexer default
+        }
+    }
     public Map<String, WebClient> getClients() {
         return clients;
     }

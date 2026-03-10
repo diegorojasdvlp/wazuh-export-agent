@@ -46,30 +46,16 @@ public class WazuhConfigLoader {
                     String value = parts[1].trim();
 
                     switch (key) {
-
-                        case "manager_url":
-                            currentConfig.setManagerUrl(value);
-                            break;
-
-                        case "manager_user":
-                            currentConfig.setManagerUser(value);
-                            break;
-
-                        case "manager_password":
-                            currentConfig.setManagerPassword(value);
-                            break;
-
-                        case "indexer_url":
-                            currentConfig.setIndexerUrl(value);
-                            break;
-
-                        case "indexer_user":
-                            currentConfig.setIndexerUser(value);
-                            break;
-
-                        case "indexer_password":
-                            currentConfig.setIndexerPassword(value);
-                            break;
+                        case "manager_url":      currentConfig.setManagerUrl(value); break;
+                        case "manager_user":     currentConfig.setManagerUser(value); break;
+                        case "manager_password": currentConfig.setManagerPassword(value); break;
+                        case "indexer_url":      currentConfig.setIndexerUrl(value); break;
+                        case "indexer_user":     currentConfig.setIndexerUser(value); break;
+                        case "indexer_password": currentConfig.setIndexerPassword(value); break;
+                        case "ssh_host":         currentConfig.setSshHost(value); break;
+                        case "ssh_port":         currentConfig.setSshPort(Integer.parseInt(value)); break;
+                        case "ssh_user":         currentConfig.setSshUser(value); break;
+                        case "ssh_password":     currentConfig.setSshPassword(value); break;
                     }
                 }
             }

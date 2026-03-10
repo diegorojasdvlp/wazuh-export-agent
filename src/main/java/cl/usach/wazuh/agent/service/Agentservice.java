@@ -37,7 +37,6 @@ public class Agentservice {
                 .flatMap(entry -> {
 
                     String instanceName = entry.getKey();
-                    WazuhProperties props = entry.getValue();
 
                     WebClient client = clientFactory.getClient(instanceName);
 

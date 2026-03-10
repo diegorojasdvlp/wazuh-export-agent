@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import javax.net.ssl.SSLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,19 +16,24 @@ import java.util.Map;
 public class WazuhClientFactory {
     private final Map<String, WebClient> clients = new HashMap<>();
 
-    public WazuhClientFactory(Map<String, WazuhProperties> instances) throws SSLException {
+    public WazuhClientFactory(Map<String, WazuhProperties> instances, SshTunnelManager tunnelManager) throws Exception {
         for (Map.Entry<String, WazuhProperties> entry : instances.entrySet()) {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
+
+            int localPort = tunnelManager.openTunnel(instanceName + "-manager", props, extractPort(props.getManagerUrl()));
+            String tunnelUrl = "https://localhost:" + localPort;
+
             SslContext sslContext = SslContextBuilder
                     .forClient()
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
                     .build();
+
             HttpClient httpClient = HttpClient.create()
                     .secure(t -> t.sslContext(sslContext));
 
             WebClient client = WebClient.builder()
-                    .baseUrl(props.getManagerUrl())
+                    .baseUrl(tunnelUrl)
                     .defaultHeaders(headers ->
                             headers.setBasicAuth(
                                     props.getManagerUser(),
@@ -38,14 +42,20 @@ public class WazuhClientFactory {
                     )
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
+
             clients.put(instanceName, client);
         }
     }
-    public WebClient getClient(String server) {
-        return clients.get(server);
-    }
 
-    public Collection<WebClient> getAllClients() {
-        return clients.values();
+    private int extractPort(String url) {
+        // e.g. https://localhost:55000 → 55000
+        try {
+            String[] parts = url.split(":");
+            return Integer.parseInt(parts[parts.length - 1].replaceAll("/.*", ""));
+        } catch (Exception e) {
+            return 55000; // Wazuh default
+        }
     }
+    public WebClient getClient(String server) { return clients.get(server); }
+    public Collection<WebClient> getAllClients() { return clients.values(); }
 }

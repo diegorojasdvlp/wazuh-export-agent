@@ -46,6 +46,11 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.mwiede</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.2.16</version>
+		</dependency>
 		<!-- Reactive PostgreSQL Support -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

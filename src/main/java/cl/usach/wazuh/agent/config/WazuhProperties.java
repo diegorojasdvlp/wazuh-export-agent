@@ -13,4 +13,9 @@ public class WazuhProperties {
     private String indexerUrl;
     private String indexerUser;
     private String indexerPassword;
+
+    private String sshHost;
+    private int sshPort = 22;
+    private String sshUser;
+    private String sshPassword;
 }
