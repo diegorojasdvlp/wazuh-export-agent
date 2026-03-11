@@ -12,6 +12,6 @@ public class WazuhConfig {
             WazuhConfigLoader loader
     ) throws Exception {
 
-        return loader.load("config.txt");
+        return loader.load("/app/config.txt");
     }
 }
