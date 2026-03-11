@@ -21,7 +21,7 @@ public class WazuhIndexerConfig {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
 
-           int localPort = tunnelManager.openTunnel(instanceName + "-indexer", props, extractPort(props.getIndexerUrl()));
+           int localPort = tunnelManager.openTunnel(30000,instanceName + "-indexer", props, extractPort(props.getIndexerUrl()));
            String tunnelUrl = "https://localhost:" + localPort;
 
             SslContext sslContext = SslContextBuilder
