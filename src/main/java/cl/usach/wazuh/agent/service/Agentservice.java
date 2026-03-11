@@ -32,41 +32,66 @@ public class Agentservice {
 
     public Flux<Agent> findAgents() {
 
-        return Flux.fromIterable(instances.entrySet())
+        int limit = 1000;
 
+        return Flux.fromIterable(instances.entrySet())
                 .flatMap(entry -> {
 
                     String instanceName = entry.getKey();
-
                     WebClient client = clientFactory.getClient(instanceName);
 
                     return tokenService.getToken(client)
-
                             .flatMapMany(token ->
-                                    client.get()
-                                            .uri("/agents?select=id,name,ip,status")
-                                            .header("Authorization", "Bearer " + token)
-                                            .retrieve()
-                                            .bodyToMono(JsonNode.class)
-                            )
-
-                            .flatMap(root ->
-                                    Flux.fromIterable(
-                                            root.path("data").path("affected_items")
-                                    )
-                            )
-
-                            .map(node -> {
-
-                                Agent agent = new Agent();
-
-                                agent.setName(node.path("name").asText(""));
-                                agent.setIp(node.path("ip").asText(""));
-                                agent.setActive(node.path("status").asText("not_connected").equals("active"));
-                                return agent;
-                            });
-
+                                    fetchAgentsPage(client, token, limit, 0)
+                            );
                 });
     }
+
+
+    private Flux<Agent> fetchAgentsPage(WebClient client, String token, int limit, int offset) {
+
+        return client.get()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/agents")
+                                .queryParam("select", "id,name,ip,status")
+                                .queryParam("limit", limit)
+                                .queryParam("offset", offset)
+                                .build()
+                )
+                .header("Authorization", "Bearer " + token)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+
+                .flatMapMany(root -> {
+
+                    var items = root.path("data").path("affected_items");
+
+                    if (items.isEmpty()) {
+                        return Flux.empty();
+                    }
+
+                    Flux<Agent> currentBatch =
+                            Flux.fromIterable(items)
+                                    .map(node -> {
+
+                                        Agent agent = new Agent();
+
+                                        agent.setName(node.path("name").asText(""));
+                                        agent.setIp(node.path("ip").asText(""));
+                                        agent.setActive(
+                                                node.path("status")
+                                                        .asText("not_connected")
+                                                        .equals("active")
+                                        );
+
+                                        return agent;
+                                    });
+
+                    return currentBatch.concatWith(
+                            fetchAgentsPage(client, token, limit, offset + limit)
+                    );
+                });
+    }
+
 
 }

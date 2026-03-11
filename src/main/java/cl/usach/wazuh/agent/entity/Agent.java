@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,9 +20,9 @@ public class Agent {
     private String name;
     private String ip;
     private boolean active;
-    private Date date;
+    private LocalDateTime date;
 
-    public Agent(String name, String ip, boolean active, Date date) {
+    public Agent(String name, String ip, boolean active, LocalDateTime date) {
         this.name = name;
         this.ip = ip;
         this.active = active;
