@@ -5,6 +5,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
@@ -20,7 +21,6 @@ public class WazuhClientFactory {
         for (Map.Entry<String, WazuhProperties> entry : instances.entrySet()) {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
-
             int localPort = tunnelManager.openTunnel(instanceName + "-manager", props, extractPort(props.getManagerUrl()));
             String tunnelUrl = "https://localhost:" + localPort;
 
@@ -32,7 +32,15 @@ public class WazuhClientFactory {
             HttpClient httpClient = HttpClient.create()
                     .secure(t -> t.sslContext(sslContext));
 
+            ExchangeStrategies strategies = ExchangeStrategies.builder()
+                    .codecs(configurer ->
+                            configurer.defaultCodecs()
+                                    .maxInMemorySize(50 * 1024 * 1024)
+                    )
+                    .build();
+
             WebClient client = WebClient.builder()
+                    .exchangeStrategies(strategies)
                     .baseUrl(tunnelUrl)
                     .defaultHeaders(headers ->
                             headers.setBasicAuth(

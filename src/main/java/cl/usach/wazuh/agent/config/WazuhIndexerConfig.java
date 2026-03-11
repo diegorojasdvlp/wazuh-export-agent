@@ -5,6 +5,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
@@ -20,8 +21,8 @@ public class WazuhIndexerConfig {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
 
-            int localPort = tunnelManager.openTunnel(instanceName + "-indexer", props, extractPort(props.getIndexerUrl()));
-            String tunnelUrl = "https://localhost:" + localPort;
+           int localPort = tunnelManager.openTunnel(instanceName + "-indexer", props, extractPort(props.getIndexerUrl()));
+           String tunnelUrl = "https://localhost:" + localPort;
 
             SslContext sslContext = SslContextBuilder
                     .forClient()
@@ -29,7 +30,14 @@ public class WazuhIndexerConfig {
                     .build();
             HttpClient httpClient = HttpClient.create()
                     .secure(t -> t.sslContext(sslContext));
+            ExchangeStrategies strategies = ExchangeStrategies.builder()
+                    .codecs(configurer ->
+                            configurer.defaultCodecs()
+                                    .maxInMemorySize(50 * 1024 * 1024)
+                    )
+                    .build();
             WebClient client = WebClient.builder()
+                    .exchangeStrategies(strategies)
                     .baseUrl(tunnelUrl)
                     .defaultHeaders(h -> h.setBasicAuth(
                             props.getIndexerUser(),

@@ -6,6 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @SpringBootApplication
 public class WazuhExportAgentApplication implements CommandLineRunner {
 
@@ -19,6 +21,7 @@ public class WazuhExportAgentApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
+		AtomicInteger counter = new AtomicInteger();
 		if (args.length > 0 && args[0].equals("pentest")) {
 			try {
 				Thread.sleep(30000); // Keep alive for 60 seconds
@@ -26,11 +29,16 @@ public class WazuhExportAgentApplication implements CommandLineRunner {
 				Thread.currentThread().interrupt();
 			}
 		} else {
-			service.syncVulnerabilityStatus().doOnNext(status -> System.out.println("Saved status: " + status))
-					.doOnError(e -> System.out.println("Error: " + e.getMessage()))
+			service.syncVulnerabilityStatus().doOnNext(v -> counter.incrementAndGet())
+					.doOnComplete(() ->
+							System.out.println("Inserted { "+counter.get()+" } rows" )
+					)
 					.doOnComplete(() -> System.out.println("Sync completed"))
-					.subscribe();
+					.blockLast();
 		}
+
 		System.exit(0);
+
+
 	}
 }
