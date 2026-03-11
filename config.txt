@@ -1,0 +1,11 @@
+[wazuh-test]
+manager_url=https://localhost:55000
+manager_user=wazuh-test
+manager_password=XXX
+indexer_url=https://localhost:9200
+indexer_user=usuario2
+indexer_password=usuariocontraseña
+ssh_host=localhost
+ssh_port=22
+ssh_user=devsecops2
+ssh_password=usuariocontraseña
