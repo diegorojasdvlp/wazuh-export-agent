@@ -21,7 +21,7 @@ public class WazuhClientFactory {
         for (Map.Entry<String, WazuhProperties> entry : instances.entrySet()) {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
-            int localPort = tunnelManager.openTunnel(instanceName + "-manager", props, extractPort(props.getManagerUrl()));
+            int localPort = tunnelManager.openTunnel(30001,instanceName + "-manager", props, extractPort(props.getManagerUrl()));
             String tunnelUrl = "https://localhost:" + localPort;
 
             SslContext sslContext = SslContextBuilder
