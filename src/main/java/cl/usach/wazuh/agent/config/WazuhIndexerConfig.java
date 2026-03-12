@@ -3,12 +3,14 @@ package cl.usach.wazuh.agent.config;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,13 +18,10 @@ import java.util.Map;
 public class WazuhIndexerConfig {
     private final Map<String, WebClient> clients = new HashMap<>();
 
-    public WazuhIndexerConfig(Map<String, WazuhProperties> instances, SshTunnelManager tunnelManager) throws Exception {
+    public WazuhIndexerConfig(Map<String, WazuhProperties> instances) throws Exception {
         for (Map.Entry<String, WazuhProperties> entry : instances.entrySet()) {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
-
-           int localPort = tunnelManager.openTunnel(30000,instanceName + "-indexer", props, extractPort(props.getIndexerUrl()));
-           String tunnelUrl = "https://localhost:" + localPort;
 
             SslContext sslContext = SslContextBuilder
                     .forClient()
@@ -36,24 +35,21 @@ public class WazuhIndexerConfig {
                                     .maxInMemorySize(50 * 1024 * 1024)
                     )
                     .build();
+            String auth = props.getIndexerUser() + ":" + props.getIndexerPassword();
+            String credentials = Base64.getEncoder().encodeToString(
+                    auth.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+            );
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Basic " + credentials);
             WebClient client = WebClient.builder()
                     .exchangeStrategies(strategies)
-                    .baseUrl(tunnelUrl)
+                    .baseUrl(props.getIndexerUrl())
                     .defaultHeaders(h -> h.setBasicAuth(
-                            props.getIndexerUser(),
-                            props.getIndexerPassword()
+                            headers.toString()
                     ))
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
             clients.put(instanceName, client);
-        }
-    }
-    private int extractPort(String url) {
-        try {
-            String[] parts = url.split(":");
-            return Integer.parseInt(parts[parts.length - 1].replaceAll("/.*", ""));
-        } catch (Exception e) {
-            return 9200; // Wazuh indexer default
         }
     }
     public Map<String, WebClient> getClients() {

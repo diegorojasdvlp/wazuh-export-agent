@@ -17,12 +17,10 @@ import java.util.Map;
 public class WazuhClientFactory {
     private final Map<String, WebClient> clients = new HashMap<>();
 
-    public WazuhClientFactory(Map<String, WazuhProperties> instances, SshTunnelManager tunnelManager) throws Exception {
+    public WazuhClientFactory(Map<String, WazuhProperties> instances) throws Exception {
         for (Map.Entry<String, WazuhProperties> entry : instances.entrySet()) {
             String instanceName = entry.getKey();
             WazuhProperties props = entry.getValue();
-            int localPort = tunnelManager.openTunnel(30001,instanceName + "-manager", props, extractPort(props.getManagerUrl()));
-            String tunnelUrl = "https://localhost:" + localPort;
 
             SslContext sslContext = SslContextBuilder
                     .forClient()
@@ -41,7 +39,7 @@ public class WazuhClientFactory {
 
             WebClient client = WebClient.builder()
                     .exchangeStrategies(strategies)
-                    .baseUrl(tunnelUrl)
+                    .baseUrl(props.getManagerUrl())
                     .defaultHeaders(headers ->
                             headers.setBasicAuth(
                                     props.getManagerUser(),

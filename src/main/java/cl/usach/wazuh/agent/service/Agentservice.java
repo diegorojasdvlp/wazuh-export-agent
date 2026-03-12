@@ -1,5 +1,6 @@
 package cl.usach.wazuh.agent.service;
 
+import cl.usach.wazuh.agent.config.SshTunnelManager;
 import cl.usach.wazuh.agent.config.WazuhClientFactory;
 import cl.usach.wazuh.agent.config.WazuhProperties;
 import cl.usach.wazuh.agent.entity.Agent;
@@ -18,33 +19,50 @@ public class Agentservice {
     private final WazuhClientFactory clientFactory;
     private final WazuhTokenService tokenService;
     private final Map<String, WazuhProperties> instances;
+    private final SshTunnelManager tunnelManager;
 
     public Agentservice(
             WazuhClientFactory clientFactory,
             WazuhTokenService tokenService,
-            Map<String, WazuhProperties> instances
+            Map<String, WazuhProperties> instances, SshTunnelManager tunnelManager
     ) {
         this.clientFactory = clientFactory;
         this.tokenService = tokenService;
         this.instances = instances;
+        this.tunnelManager = tunnelManager;
     }
 
 
-    public Flux<Agent> findAgents() {
+    public Flux<Agent> findAgents()  {
 
         int limit = 1000;
-
         return Flux.fromIterable(instances.entrySet())
                 .flatMap(entry -> {
-
+                    WazuhProperties props = entry.getValue();
                     String instanceName = entry.getKey();
+                    try {
+                        tunnelManager.openTunnel(55001,instanceName+"-manager", props, extractPort(props.getManagerUrl()));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+
                     WebClient client = clientFactory.getClient(instanceName);
 
-                    return tokenService.getToken(client)
+                    Flux<Agent> agentes = tokenService.getToken(client)
                             .flatMapMany(token ->
                                     fetchAgentsPage(client, token, limit, 0)
                             );
+                    tunnelManager.closeAll();
+                    return agentes;
                 });
+    }
+    private int extractPort(String url) {
+        try {
+            String[] parts = url.split(":");
+            return Integer.parseInt(parts[parts.length - 1].replaceAll("/.*", ""));
+        } catch (Exception e) {
+            return 55000; // Wazuh manager default
+        }
     }
 
 
