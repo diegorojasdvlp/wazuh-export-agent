@@ -41,7 +41,7 @@ public class Agentservice {
                     WazuhProperties props = entry.getValue();
                     String instanceName = entry.getKey();
                     try {
-                        tunnelManager.openTunnel(55001,instanceName+"-manager", props, extractPort(props.getManagerUrl()));
+                        tunnelManager.openTunnel(55000,instanceName+"-manager", props, extractPort(props.getManagerUrl()));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -51,8 +51,7 @@ public class Agentservice {
                     Flux<Agent> agentes = tokenService.getToken(client)
                             .flatMapMany(token ->
                                     fetchAgentsPage(client, token, limit, 0)
-                            );
-                    tunnelManager.closeAll();
+                            ).doFinally(signalType ->  tunnelManager.closeAll());
                     return agentes;
                 });
     }
