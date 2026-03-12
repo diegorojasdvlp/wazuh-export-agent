@@ -50,6 +50,7 @@ public class WazuhClientFactory {
             System.out.println("manager pass: " + props.getManagerPassword());
             headers.set("Authorization", "Basic " + credentials);
             WebClient client = WebClient.builder()
+                    .baseUrl(props.getManagerUrl())
                     .defaultHeaders(h -> h.setBasicAuth(
                             props.getManagerUser(),
                             props.getManagerPassword()
