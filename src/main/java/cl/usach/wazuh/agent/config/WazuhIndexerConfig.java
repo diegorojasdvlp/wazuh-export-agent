@@ -44,6 +44,7 @@ public class WazuhIndexerConfig {
                     ))
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
+            System.out.println("Created Indexer WebClient for [" + instanceName + "] User: " + props.getIndexerUser() + " URL: " + props.getIndexerUrl());
             clients.put(instanceName, client);
         }
     }
