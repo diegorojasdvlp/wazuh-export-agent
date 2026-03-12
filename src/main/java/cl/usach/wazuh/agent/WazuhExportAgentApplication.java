@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootApplication
-public class WazuhExportAgentApplication implements CommandLineRunner {
+public class WazuhExportAgentApplication {
 
 	@Autowired
 	private VulnerabilityStatusService service;
@@ -18,10 +18,10 @@ public class WazuhExportAgentApplication implements CommandLineRunner {
 		SpringApplication.run(WazuhExportAgentApplication.class, args);
 	}
 
-	@Override
+
 	public void run(String... args) {
 
-		AtomicInteger counter = new AtomicInteger();
+		/*
 		if (args.length > 0 && args[0].equals("pentest")) {
 			try {
 				Thread.sleep(30000); // Keep alive for 60 seconds
@@ -29,13 +29,16 @@ public class WazuhExportAgentApplication implements CommandLineRunner {
 				Thread.currentThread().interrupt();
 			}
 		} else {
+
+		 */
+			AtomicInteger counter = new AtomicInteger();
 			service.syncVulnerabilityStatus().doOnNext(v -> counter.incrementAndGet())
 					.doOnComplete(() ->
 							System.out.println("Inserted { "+counter.get()+" } rows" )
 					)
 					.doOnComplete(() -> System.out.println("Sync completed"))
 					.blockLast();
-		}
+	//	}
 
 		System.exit(0);
 
