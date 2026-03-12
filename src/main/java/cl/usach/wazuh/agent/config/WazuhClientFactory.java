@@ -5,12 +5,11 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,40 +39,19 @@ public class WazuhClientFactory {
                     .build();
 
             ;
-            String userpass = props.getManagerUser() + ":" + props.getManagerPassword();
-            String credentials = Base64.getEncoder().encodeToString(
-                    userpass.getBytes(java.nio.charset.StandardCharsets.UTF_8)
-            );
-            HttpHeaders headers = new HttpHeaders();
-            System.out.println("credentials: " + credentials);
-            System.out.println("manager user: " + props.getManagerUser());
-            System.out.println("manager pass: " + props.getManagerPassword());
-            headers.set("Authorization", "Basic " + credentials);
             WebClient client = WebClient.builder()
-                    .baseUrl(props.getManagerUrl())
-                    .defaultHeaders(h -> h.setBasicAuth(
-                            props.getManagerUser(),
-                            props.getManagerPassword()
-                    ))
-                    .clientConnector(new ReactorClientHttpConnector(httpClient))
-                    .build();
-
-            String auth = client.post()
-                    .uri("/security/user/authenticate?raw=true")
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-            String Autorization = "Authorization: Bearer " + auth;
-            System.out.println("Auth: " + auth);
-            WebClient authclient = WebClient.builder()
                     .exchangeStrategies(strategies)
                     .baseUrl(props.getManagerUrl())
-                    .defaultHeader(Autorization)
+                    .defaultHeaders(headers ->
+                            headers.setBasicAuth(
+                                    props.getManagerUser(),
+                                    props.getManagerPassword()
+                            )
+                    )
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
 
-
-            clients.put(instanceName, authclient);
+            clients.put(instanceName, client);
         }
     }
 

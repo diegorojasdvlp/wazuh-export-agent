@@ -48,8 +48,10 @@ public class Agentservice {
 
                     WebClient client = clientFactory.getClient(instanceName);
 
-                    Flux<Agent> agentes = fetchAgentsPage(client, "token", limit, 0)
-                            .doFinally(signalType ->  tunnelManager.closeAll());
+                    Flux<Agent> agentes = tokenService.getToken(client)
+                            .flatMapMany(token ->
+                                    fetchAgentsPage(client, token, limit, 0)
+                            ).doFinally(signalType ->  tunnelManager.closeAll());
                     return agentes;
                 });
     }
@@ -73,6 +75,7 @@ public class Agentservice {
                                 .queryParam("offset", offset)
                                 .build()
                 )
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
 
