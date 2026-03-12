@@ -56,7 +56,8 @@ public class WazuhClientFactory {
             String auth = String.valueOf(client.post()
                     .uri("/security/user/authenticate?raw=true")
                     .retrieve()
-                    .bodyToMono(String.class));
+                    .bodyToMono(String.class)
+                    .block());
             String Autorization = "Authorization: Bearer " + auth;
             System.out.println("Auth: " + auth);
             WebClient authclient = WebClient.builder()
