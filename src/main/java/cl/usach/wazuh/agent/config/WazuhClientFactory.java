@@ -45,19 +45,23 @@ public class WazuhClientFactory {
                     userpass.getBytes(java.nio.charset.StandardCharsets.UTF_8)
             );
             HttpHeaders headers = new HttpHeaders();
+            System.out.println("credentials: " + credentials);
+            System.out.println("manager user: " + props.getManagerUser());
+            System.out.println("manager pass: " + props.getManagerPassword());
             headers.set("Authorization", "Basic " + credentials);
             WebClient client = WebClient.builder()
                     .defaultHeaders(h -> h.setBasicAuth(
-                            String.valueOf(headers)
+                            props.getManagerUser(),
+                            props.getManagerPassword()
                     ))
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
 
-            String auth = String.valueOf(client.post()
+            String auth = client.post()
                     .uri("/security/user/authenticate?raw=true")
                     .retrieve()
                     .bodyToMono(String.class)
-                    .block());
+                    .block();
             String Autorization = "Authorization: Bearer " + auth;
             System.out.println("Auth: " + auth);
             WebClient authclient = WebClient.builder()
