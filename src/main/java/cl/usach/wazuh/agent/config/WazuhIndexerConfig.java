@@ -3,14 +3,14 @@ package cl.usach.wazuh.agent.config;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import java.util.Base64;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,17 +35,12 @@ public class WazuhIndexerConfig {
                                     .maxInMemorySize(50 * 1024 * 1024)
                     )
                     .build();
-            String auth = props.getIndexerUser() + ":" + props.getIndexerPassword();
-            String credentials = Base64.getEncoder().encodeToString(
-                    auth.getBytes(java.nio.charset.StandardCharsets.UTF_8)
-            );
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Basic " + credentials);
             WebClient client = WebClient.builder()
                     .exchangeStrategies(strategies)
                     .baseUrl(props.getIndexerUrl())
                     .defaultHeaders(h -> h.setBasicAuth(
-                            headers.toString()
+                            props.getIndexerUser(),
+                            props.getIndexerPassword()
                     ))
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .build();
